@@ -1,0 +1,111 @@
+# Node.js Integration - Package Configuration
+
+This is an example package.json for integrating Node.js applications with
+the Leceil Morgan Corp Workflow Automation system.
+
+## Installation
+
+```bash
+npm install
+```
+
+## Usage
+
+```bash
+node examples/nodejs_integration.js
+```
+
+## Dependencies
+
+- axios: HTTP client for API calls
+- dotenv: Environment variable management
+
+## Environment Variables
+
+Create a .env file:
+
+```
+API_BASE_URL=http://localhost:5000/api
+USER_ID=your-user-id
+```
+
+## Integration Examples
+
+### 1. Express.js Webhook Receiver
+
+```javascript
+const express = require('express');
+const WorkflowAutomationClient = require('./examples/nodejs_integration');
+
+const app = express();
+const client = new WorkflowAutomationClient();
+
+app.post('/webhooks/form-submitted', async (req, res) => {
+    try {
+        const { form_id, form_data } = req.body;
+        
+        // Submit form via API
+        const result = await client.submitForm(form_id, form_data);
+        
+        res.json({ success: true, submission_id: result.submission_id });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+app.listen(3000, () => {
+    console.log('Webhook server listening on port 3000');
+});
+```
+
+### 2. Scheduled Tasks
+
+```javascript
+const cron = require('node-cron');
+const WorkflowAutomationClient = require('./examples/nodejs_integration');
+
+const client = new WorkflowAutomationClient();
+
+// Run daily at 2 AM
+cron.schedule('0 2 * * *', async () => {
+    try {
+        console.log('Running daily document archival...');
+        
+        const documents = await client.searchDocuments(null, ['to-archive']);
+        
+        for (const doc of documents.documents) {
+            // Process each document
+            console.log(`Processing: ${doc.name}`);
+        }
+    } catch (error) {
+        console.error('Scheduled task failed:', error.message);
+    }
+});
+```
+
+### 3. Email Integration
+
+```javascript
+const nodemailer = require('nodemailer');
+const WorkflowAutomationClient = require('./examples/nodejs_integration');
+
+const client = new WorkflowAutomationClient();
+const transporter = nodemailer.createTransport({...});
+
+async function sendFormConfirmation(submissionId) {
+    try {
+        // Get submission details
+        const submission = await client.getSubmission(submissionId);
+        
+        // Send confirmation email
+        await transporter.sendMail({
+            from: 'noreply@leceilmorgan.com',
+            to: submission.submitter_email,
+            subject: 'Form Submission Confirmation',
+            html: `<p>Your form has been received. Confirmation ID: ${submissionId}</p>`
+        });
+    } catch (error) {
+        console.error('Failed to send confirmation:', error.message);
+    }
+}
+```

@@ -1,0 +1,47 @@
+{
+  "app_name": "Leceil Morgan Corp - Workflow Automation & Document Management",
+  "version": "1.0.0",
+  "environment": "development",
+  "logging": {
+    "level": "INFO",
+    "file": "logs/app.log"
+  },
+  "storage": {
+    "documents_path": "./documents",
+    "temp_path": "./temp"
+  },
+  "integrations": {
+    "sharepoint": {
+      "enabled": true,
+      "site_url": "https://leceilmorgan.sharepoint.com",
+      "library_default": "Documents"
+    },
+    "onedrive": {
+      "enabled": true
+    },
+    "notifications": {
+      "email": {
+        "enabled": true,
+        "provider": "smtp",
+        "smtp_host": "smtp.office365.com",
+        "smtp_port": 587
+      },
+      "slack": {
+        "enabled": false,
+        "webhook_url": ""
+      },
+      "teams": {
+        "enabled": false,
+        "webhook_url": ""
+      }
+    }
+  },
+  "workflows": {
+    "max_execution_time": 300,
+    "enable_notifications": true
+  },
+  "forms": {
+    "max_file_upload_size": 10485760,
+    "allowed_file_types": ["pdf", "docx", "xlsx", "jpg", "png"]
+  }
+}
